@@ -1,0 +1,39 @@
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_start"
+        android:orderInCategory="100"
+        android:title="@string/startService"
+        android:icon="?attr/iconStart"
+        app:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/menu_stop"
+        android:orderInCategory="100"
+        android:title="@string/stopService"
+        android:icon="?attr/iconStop"
+        app:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/menu_prefs"
+        android:orderInCategory="100"
+        android:showAsAction="always|withText"
+        android:title="@string/prefs"
+        android:icon="?attr/iconSettings"
+        tools:ignore="AppCompatResource" />
+
+    <item
+        android:id="@+id/menu_about"
+        android:orderInCategory="100"
+        android:showAsAction="collapseActionView|withText"
+        android:title="About"
+        tools:ignore="AppCompatResource" />
+
+    <item
+        android:id="@+id/menu_exit"
+        android:orderInCategory="100"
+        android:showAsAction="collapseActionView|withText"
+        android:title="Exit"
+        tools:ignore="AppCompatResource" />
+</menu>
