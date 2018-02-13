@@ -119,12 +119,12 @@
 			android:entryValues="@array/prefThemeValues" />
 		<ListPreference
 			android:name="logging"
-			android:key="loggingPref"
-			android:title="@string/prefTitleLogging"
-			android:summary="@string/prefSummaryLogging"
 			android:defaultValue="0"
 			android:entries="@array/prefLoggingNames"
-			android:entryValues="@array/prefLoggingValues" />
+			android:entryValues="@array/prefLoggingValues"
+			android:key="loggingPref"
+			android:summary="@string/prefSummaryLogging"
+			android:title="@string/prefTitleLogging" />
 
 	</PreferenceCategory>
 </PreferenceScreen>

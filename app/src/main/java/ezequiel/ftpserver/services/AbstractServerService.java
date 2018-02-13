@@ -87,6 +87,7 @@ public abstract class AbstractServerService
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+
 		logger.debug("onStartCommand()");
 
 		if (intent == null) {

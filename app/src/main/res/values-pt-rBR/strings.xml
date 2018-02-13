@@ -5,15 +5,15 @@
     <string name="ipAddrLabel">IP Address</string>
     <string name="ifacesError">Error: </string>
     <string name="protocolLabel">Protocol</string>
-    <string name="portLabel">Port</string>
+    <string name="portLabel">Porta</string>
     <string name="fingerprintsLabel">Key Fingerprints</string>
     <string name="generateKeysMessage">Generate Keys ?</string>
     <string name="generatingKeysMessage">Generating Keys &#8230;</string>
     <string name="generate">Generate</string>
     <string name="cancel">Cancel</string>
     <string name="state">State</string>
-    <string name="serverStarted">Running &#8230;</string>
-    <string name="serverStopped">Stopped</string>
+    <string name="serverStarted">Rodando &#8230;</string>
+    <string name="serverStopped">Parado</string>
     <string name="permissionRequired">\"%1$s\" permission is required for this app to work!</string>
     <string name="permissionNameStorage">Storage</string>
     <string name="quickSettingsServerStarted">pFTPd Running &#8230;</string>
@@ -125,4 +125,5 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string name="grantingPremission">w = permissão de escrita r = permissão de leitura</string>
 </resources>

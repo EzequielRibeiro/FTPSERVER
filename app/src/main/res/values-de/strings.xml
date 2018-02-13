@@ -103,5 +103,6 @@
         <item>In Textdatei loggen</item>
         <item>In Android Log schreiben</item>
     </string-array>
+    <string name="grantingPremission">w = Erteilen von Schreiben r = Gewähren Lesen</string>
 
 </resources>

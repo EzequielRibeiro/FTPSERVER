@@ -1,8 +1,8 @@
 package ezequiel.ftpserver.services;
 
+
 import android.net.Uri;
 import android.os.Looper;
-
 import org.apache.ftpserver.ConnectionConfigFactory;
 import org.apache.ftpserver.DataConnectionConfigurationFactory;
 import org.apache.ftpserver.FtpServer;
@@ -48,6 +48,8 @@ public class FtpServerService extends AbstractServerService
 		return prefsBean.getPort();
 	}
 
+
+
 	@Override
 	protected String getServiceName()
 	{
@@ -63,6 +65,9 @@ public class FtpServerService extends AbstractServerService
 
 	@Override
 	protected boolean launchServer(final Shell.Interactive shell) {
+
+
+
 		ListenerFactory listenerFactory = new ListenerFactory();
 		listenerFactory.setPort(prefsBean.getPort());
 

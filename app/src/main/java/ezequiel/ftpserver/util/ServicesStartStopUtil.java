@@ -1,5 +1,6 @@
 package ezequiel.ftpserver.util;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -12,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import ezequiel.ftpserver.PrefsBean;
@@ -37,10 +39,12 @@ public class ServicesStartStopUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesStartStopUtil.class);
 
+
     public static void startServers(
             Context context,
             PrefsBean prefsBean,
             PrimitiveFtpdActivity activity) {
+
         if (!isPasswordOk(prefsBean)) {
             Toast.makeText(
                 context,

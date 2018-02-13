@@ -49,6 +49,7 @@ public class SshServerService extends AbstractServerService
 {
 	private SshServer sshServer;
 
+
 	@Override
 	protected ServerServiceHandler createServiceHandler(
 		Looper serviceLooper,
@@ -84,6 +85,8 @@ public class SshServerService extends AbstractServerService
 			logger.error("could not stop ssh server", e);
 		}
 		sshServer = null;
+
+
 	}
 
 	@Override
@@ -113,6 +116,7 @@ public class SshServerService extends AbstractServerService
 					String password,
 					ServerSession session) {
 				logger.debug("password auth for user: {}", username);
+
 				Authentication authentication = AndroidPrefsUserManager.ANONYMOUS_USER_NAME.equals(username)
 					? new AnonymousAuthentication()
 					: new UsernamePasswordAuthentication(username, password);

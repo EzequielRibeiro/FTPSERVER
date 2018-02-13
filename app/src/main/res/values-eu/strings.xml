@@ -78,5 +78,6 @@
         <item>Testu fitxategi batera erregistratu</item>
         <item>Androidera erregistratu</item>
     </string-array>
+    <string name="grantingPremission">w = otorgar escritura r = otorgando lectura</string>
 
 </resources>

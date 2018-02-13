@@ -22,12 +22,16 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewManager;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +42,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import ezequiel.ftpserver.log.PrimFtpdLoggerBinder;
 import ezequiel.ftpserver.prefs.*;
+import ezequiel.ftpserver.services.ServiceLogCat;
 import ezequiel.ftpserver.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,35 +55,63 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Enumeration;
+
+import static eu.chainfire.libsuperuser.Debug.TAG;
 
 /**
  * Activity to display network info and to start FTP service.
  */
 public class PrimitiveFtpdActivity extends Activity {
 
+	private TextView textViewLog;
+	ArrayList<String> listLog;
+	ArrayAdapter<String> adapter;
+	ListView listView;
+	public static String SEND_LOG_USER_TO_CONSOLE = "SEND_LOG_USER_TO_CONSOLE";
+
+	//Para chamar o Broadcast
+   /*
+	Intent i = new Intent();
+		i.setAction(PrimitiveFtpdActivity.SEND_LOG_USER_TO_CONSOLE);
+		i.putExtra(PrimitiveFtpdActivity.SEND_LOG_USER_TO_CONSOLE,"test");
+	            sendBroadcast(i);
+	*/
+
 	private BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
 		@Override
-	 	public void onReceive(Context context, Intent intent) {
-		logger.debug("network connectivity changed, data str: '{}', action: '{}'",
-			intent.getDataString(),
-			intent.getAction());
-		showAddresses();
+		public void onReceive(Context context, Intent intent) {
+			logger.debug("network connectivity changed, data str: '{}', action: '{}'",
+					intent.getDataString(),
+					intent.getAction());
+
+			showAddresses();
+
+			String action = intent.getAction();
+
+			if (action.equals(SEND_LOG_USER_TO_CONSOLE)) {
+
+				listLog.add(intent.getStringExtra(SEND_LOG_USER_TO_CONSOLE));
+				adapter.notifyDataSetChanged();
+				listView.setSelection(listLog.size() -1);
+
+			}
+
 		}
 	};
 
 	// flag must be static to be avail after activity change
 	private static boolean prefsChanged = false;
 	private OnSharedPreferenceChangeListener prefsChangeListener =
-		new OnSharedPreferenceChangeListener()
-	{
-		@Override public void onSharedPreferenceChanged(
-			SharedPreferences sharedPreferences, String key)
-		{
-			logger.debug("onSharedPreferenceChanged(), key: {}", key);
-			prefsChanged = true;
-		}
-	};
+			new OnSharedPreferenceChangeListener() {
+				@Override
+				public void onSharedPreferenceChanged(
+						SharedPreferences sharedPreferences, String key) {
+					logger.debug("onSharedPreferenceChanged(), key: {}", key);
+					prefsChanged = true;
+				}
+			};
 
 	public static final String PUBLICKEY_FILENAME = "pftpd-pub.bin";
 	public static final String PRIVATEKEY_FILENAME = "pftpd-priv.pk8";
@@ -97,7 +130,9 @@ public class PrimitiveFtpdActivity extends Activity {
 	private String fingerprintSha256 = " - ";
 	private long timestampOfLastEvent = 0;
 
-	/** Called when the activity is first created. */
+	/**
+	 * Called when the activity is first created.
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		// basic setup
@@ -121,6 +156,10 @@ public class PrimitiveFtpdActivity extends Activity {
 		calcPubkeyFingerprints();
 		showKeyFingerprints();
 
+		textViewLog = (TextView) findViewById(R.id.textViewLogger);
+		textViewLog.setMovementMethod(new ScrollingMovementMethod());
+
+		// create addresses label
 		// create addresses label
 		((TextView) findViewById(R.id.addressesLabel)).setText(
 				String.format("%s (%s)", getText(R.string.ipAddrLabel), getText(R.string.ifacesLabel))
@@ -138,22 +177,133 @@ public class PrimitiveFtpdActivity extends Activity {
 		// hide SAF storage type radios and texts for old androids
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			View radioStorageSaf = findViewById(R.id.radioStorageSaf);
-			((ViewManager)radioStorageSaf.getParent()).removeView(radioStorageSaf);
+			((ViewManager) radioStorageSaf.getParent()).removeView(radioStorageSaf);
 
 			View radioStorageRoSaf = findViewById(R.id.radioStorageRoSaf);
-			((ViewManager)radioStorageRoSaf.getParent()).removeView(radioStorageRoSaf);
+			((ViewManager) radioStorageRoSaf.getParent()).removeView(radioStorageRoSaf);
 
 			View safExplainHeading = findViewById(R.id.safExplainHeading);
-			((ViewManager)safExplainHeading.getParent()).removeView(safExplainHeading);
+			((ViewManager) safExplainHeading.getParent()).removeView(safExplainHeading);
 
 			View safExplain = findViewById(R.id.safExplain);
-			((ViewManager)safExplain.getParent()).removeView(safExplain);
+			((ViewManager) safExplain.getParent()).removeView(safExplain);
 		}
+
+		/*
+		DbHandle db = new DbHandle(this);
+		UserDataBase userDataBase;
+		userDataBase = new UserDataBase("Ezequiel", "xxxxxxxx",
+				"w+r", "/data/data/files");
+
+
+		db.onUpgradeOrADD(userDataBase);
+
+		userDataBase = new UserDataBase("Felipe", "xxxxxxxx",
+				"w+r", "/data/data/files");
+
+		db.onUpgradeOrADD(userDataBase);
+
+		userDataBase = new UserDataBase("Daniel", "xxxxxxxx",
+				"w+r", "/data/data/files");
+
+		db.onUpgradeOrADD(userDataBase);
+
+		userDataBase = new UserDataBase("Paulistano", "xxxxxxxx",
+				"w+r", "/data/data/files");
+
+		db.onUpgradeOrADD(userDataBase);
+
+		userDataBase = new UserDataBase("Administrador", "xxxxxxxx",
+				"w+r", "/data/data/files");
+
+		db.onUpgradeOrADD(userDataBase);
+
+
+		//db.deleteUser(prefsBean);
+
+		Cursor cursor = db.getAllUsers();
+
+		if (cursor != null) {
+
+			if (cursor.moveToFirst()) {
+
+				do {
+
+
+					Log.e("UserBanco:", cursor.getString(cursor.getColumnIndex(DbHandle.KEY_ID)));
+					Log.e("UserBanco:", cursor.getString(cursor.getColumnIndex(DbHandle.KEY_USER)));
+					Log.e("UserBanco:", cursor.getString(cursor.getColumnIndex(DbHandle.KEY_PASS)));
+					Log.e("UserBanco:", cursor.getString(cursor.getColumnIndex(DbHandle.KEY_PERMISSIONS)));
+					Log.e("UserBanco:", cursor.getString(cursor.getColumnIndex(DbHandle.KEY_PATH)));
+
+
+				} while (cursor.moveToNext());
+
+			}
+
+			Intent intent = new Intent(this, activity_list_users.class);
+			//startActivity(intent);
+
+		}
+
+		*/
+
+		Cursor cursorLog = new DbHandle(getApplicationContext()).getAllRegister();
+		listLog = new ArrayList<>();
+
+		try {
+			if (cursorLog.moveToFirst()) {
+				do {
+					 String log = cursorLog.getString(cursorLog.getColumnIndex(DbHandle.KEY_DATA))+": "+
+							 cursorLog.getString(cursorLog.getColumnIndex(DbHandle.KEY_REGISTRO));
+
+					listLog.add(log);
+
+				} while(cursorLog.moveToNext());
+			}
+		} catch (Exception e) {
+			Log.d(TAG, "Error while trying to get posts from database");
+		}
+
+		 adapter = new ArrayAdapter<>(this,
+				R.layout.custom_listview_log,listLog);
+
+
+		listView = (ListView) findViewById(R.id.listViewLog);
+
+		listView.setAdapter(adapter);
+
+
+	}
+
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+
+		TextView textView = (TextView) findViewById(R.id.textViewLogger);
+
+		textView.setText(savedInstanceState.getString("textView"));
+
+
 	}
 
 	@Override
-	protected void onDestroy()
-	{
+	protected void onSaveInstanceState(Bundle outState) {
+
+		TextView textView = (TextView) findViewById(R.id.textViewLogger);
+
+		outState.putString("textView",textView.getText().toString());
+
+		super.onSaveInstanceState(outState);
+
+
+
+	}
+
+
+	@Override
+	protected void onDestroy() {
 		super.onDestroy();
 
 		// prefs change
@@ -162,6 +312,14 @@ public class PrimitiveFtpdActivity extends Activity {
 
 		// server state change events
 		EventBus.getDefault().unregister(this);
+	}
+
+
+	protected  void onStop(){
+		super.onStop();
+
+		stopService(new Intent(PrimitiveFtpdActivity.this,ServiceLogCat.class));
+
 	}
 
 	@Override
@@ -174,46 +332,63 @@ public class PrimitiveFtpdActivity extends Activity {
 		showUsername();
 		showAnonymousLogin();
 
-        // init storage type radio
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            switch (prefsBean.getStorageType()) {
-                case PLAIN:
-                    ((RadioButton) findViewById(R.id.radioStoragePlain)).setChecked(true);
-                    break;
-                case ROOT:
-                    ((RadioButton) findViewById(R.id.radioStorageRoot)).setChecked(true);
-                    break;
-                case SAF:
-                    ((RadioButton) findViewById(R.id.radioStorageSaf)).setChecked(true);
-                    showSafUrl(prefsBean.getSafUrl());
-                    break;
-                case RO_SAF:
-                    ((RadioButton) findViewById(R.id.radioStorageRoSaf)).setChecked(true);
-                    showSafUrl(prefsBean.getSafUrl());
-                    break;
-            }
-        } else {
-            switch (prefsBean.getStorageType()) {
-                case PLAIN:
-                    ((RadioButton) findViewById(R.id.radioStoragePlain)).setChecked(true);
-                    break;
-                case ROOT:
-                    ((RadioButton) findViewById(R.id.radioStorageRoot)).setChecked(true);
-                    break;
-            }
-        }
+		startService(new Intent(PrimitiveFtpdActivity.this,ServiceLogCat.class));
+
+		// init storage type radio
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			switch (prefsBean.getStorageType()) {
+				case PLAIN:
+					((RadioButton) findViewById(R.id.radioStoragePlain)).setChecked(true);
+					break;
+				case ROOT:
+					((RadioButton) findViewById(R.id.radioStorageRoot)).setChecked(true);
+					break;
+				case SAF:
+					((RadioButton) findViewById(R.id.radioStorageSaf)).setChecked(true);
+					showSafUrl(prefsBean.getSafUrl());
+					break;
+				case RO_SAF:
+					((RadioButton) findViewById(R.id.radioStorageRoSaf)).setChecked(true);
+					showSafUrl(prefsBean.getSafUrl());
+					break;
+			}
+		} else {
+			switch (prefsBean.getStorageType()) {
+				case PLAIN:
+					((RadioButton) findViewById(R.id.radioStoragePlain)).setChecked(true);
+					break;
+				case ROOT:
+					((RadioButton) findViewById(R.id.radioStorageRoot)).setChecked(true);
+					break;
+			}
+		}
 	}
+
+
+
+
+
+	protected  void onPostResume(){
+		super.onPostResume();
+
+	}
+
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
+
 		logger.debug("onResume()");
 
 		// register listener to reprint interfaces table when network connections change
 		// TODO show current IP for android 7
-		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		filter.addAction(SEND_LOG_USER_TO_CONSOLE);
+
 		registerReceiver(this.networkStateReceiver, filter);
+
 
 		// e.g. necessary when ports preferences have been changed
 		displayServersState();
@@ -230,6 +405,7 @@ public class PrimitiveFtpdActivity extends Activity {
 
 		// unregister broadcast receiver
 		this.unregisterReceiver(this.networkStateReceiver);
+
 	}
 
 	public void onRadioButtonClicked(View view) {
@@ -239,7 +415,7 @@ public class PrimitiveFtpdActivity extends Activity {
 		StorageType storageType = null;
 
 		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-		switch(view.getId()) {
+		switch (view.getId()) {
 			case R.id.radioStoragePlain:
 				storageType = StorageType.PLAIN;
 				break;
@@ -276,7 +452,7 @@ public class PrimitiveFtpdActivity extends Activity {
 
 					int modeFlags =
 							(Intent.FLAG_GRANT_READ_URI_PERMISSION
-							| Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+									| Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
 					// release old permissions
 					String oldUrl = prefsBean.getSafUrl();
@@ -422,7 +598,7 @@ public class PrimitiveFtpdActivity extends Activity {
 	 * Creates table containing network interfaces.
 	 */
 	protected void showAddresses() {
-		LinearLayout container = (LinearLayout)findViewById(R.id.addressesContainer);
+		LinearLayout container = (LinearLayout) findViewById(R.id.addressesContainer);
 
 		// clear old entries
 		container.removeAllViews();
@@ -440,18 +616,18 @@ public class PrimitiveFtpdActivity extends Activity {
 					String hostAddr = inetAddr.getHostAddress();
 
 					logger.debug("addr: '{}', iface name: '{}', disp name: '{}', loopback: '{}'",
-						new Object[]{
-							inetAddr,
-							ifaceName,
-							ifaceDispName,
-							inetAddr.isLoopbackAddress()});
+							new Object[]{
+									inetAddr,
+									ifaceName,
+									ifaceDispName,
+									inetAddr.isLoopbackAddress()});
 
 					if (inetAddr.isLoopbackAddress()) {
 						continue;
 					}
 
 					String displayText = hostAddr + " (" + ifaceDispName + ")";
-					if(displayText.contains("::")) {
+					if (displayText.contains("::")) {
 						// Don't include the raw encoded names. Just the raw IP addresses.
 						logger.debug("Skipping IPv6 address '{}'", displayText);
 						continue;
@@ -473,13 +649,13 @@ public class PrimitiveFtpdActivity extends Activity {
 
 	@SuppressLint("SetTextI18n")
 	protected void showPortsAndServerState() {
-		((TextView)findViewById(R.id.ftpTextView))
-			.setText("ftp / " + prefsBean.getPortStr() + " / " +
-			getText(serversRunning.ftp
-				? R.string.serverStarted
-				: R.string.serverStopped));
+		((TextView) findViewById(R.id.ftpTextView))
+				.setText("ftp / " + prefsBean.getPortStr() + " / " +
+						getText(serversRunning.ftp
+								? R.string.serverStarted
+								: R.string.serverStopped));
 
-		((TextView)findViewById(R.id.sftpTextView))
+		((TextView) findViewById(R.id.sftpTextView))
 				.setText("sftp / " + prefsBean.getSecurePortStr() + " / " +
 						getText(serversRunning.ssh
 								? R.string.serverStarted
@@ -487,37 +663,37 @@ public class PrimitiveFtpdActivity extends Activity {
 	}
 
 	protected void showUsername() {
-		TextView usernameView = (TextView)findViewById(R.id.usernameTextView);
+		TextView usernameView = (TextView) findViewById(R.id.usernameTextView);
 		usernameView.setText(prefsBean.getUserName());
 	}
 
 	protected void showAnonymousLogin() {
-		TextView anonymousView = (TextView)findViewById(R.id.anonymousLoginTextView);
+		TextView anonymousView = (TextView) findViewById(R.id.anonymousLoginTextView);
 		anonymousView.setText(getString(R.string.isAnonymous, prefsBean.isAnonymousLogin()));
 	}
 
 	protected void showSafUrl(String url) {
 		findViewById(R.id.safUriLabel).setVisibility(View.VISIBLE);
-		TextView safUriView = (TextView)findViewById(R.id.safUri);
+		TextView safUriView = (TextView) findViewById(R.id.safUri);
 		safUriView.setVisibility(View.VISIBLE);
 		safUriView.setText(url);
 	}
 
 	@SuppressLint("SetTextI18n")
 	protected void showKeyFingerprints() {
-		((TextView)findViewById(R.id.keyFingerprintMd5Label))
+		((TextView) findViewById(R.id.keyFingerprintMd5Label))
 				.setText("MD5");
-		((TextView)findViewById(R.id.keyFingerprintSha1Label))
+		((TextView) findViewById(R.id.keyFingerprintSha1Label))
 				.setText("SHA1");
-		((TextView)findViewById(R.id.keyFingerprintSha256Label))
+		((TextView) findViewById(R.id.keyFingerprintSha256Label))
 				.setText("SHA256");
 
-		((TextView)findViewById(R.id.keyFingerprintMd5TextView))
-			.setText(fingerprintMd5);
-		((TextView)findViewById(R.id.keyFingerprintSha1TextView))
-			.setText(fingerprintSha1);
-		((TextView)findViewById(R.id.keyFingerprintSha256TextView))
-			.setText(fingerprintSha256);
+		((TextView) findViewById(R.id.keyFingerprintMd5TextView))
+				.setText(fingerprintMd5);
+		((TextView) findViewById(R.id.keyFingerprintSha1TextView))
+				.setText(fingerprintSha1);
+		((TextView) findViewById(R.id.keyFingerprintSha256TextView))
+				.setText(fingerprintSha256);
 
 		// create onRefreshListener
 		View refreshButton = findViewById(R.id.keyFingerprintsLabel);
@@ -537,8 +713,8 @@ public class PrimitiveFtpdActivity extends Activity {
 		progressDiag.setMessage(getText(R.string.generatingKeysMessage));
 
 		AsyncTask<Void, Void, Void> task = new GenKeysAsyncTask(
-			progressDiag,
-			startServerOnFinish);
+				progressDiag,
+				startServerOnFinish);
 		task.execute();
 
 		progressDiag.show();
@@ -581,9 +757,8 @@ public class PrimitiveFtpdActivity extends Activity {
 		private final boolean startServerOnFinish;
 
 		public GenKeysAsyncTask(
-			ProgressDialog progressDiag,
-			boolean startServerOnFinish)
-		{
+				ProgressDialog progressDiag,
+				boolean startServerOnFinish) {
 			this.progressDiag = progressDiag;
 			this.startServerOnFinish = startServerOnFinish;
 		}
@@ -604,6 +779,7 @@ public class PrimitiveFtpdActivity extends Activity {
 			}
 			return null;
 		}
+
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
@@ -714,21 +890,21 @@ public class PrimitiveFtpdActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_start:
-			handleStart();
-			break;
-		case R.id.menu_stop:
-			handleStop();
-			break;
-		case R.id.menu_prefs:
-			handlePrefs();
-			break;
-		case R.id.menu_about:
-			handleAbout();
-			break;
-		case R.id.menu_exit:
-			finish();
-			break;
+			case R.id.menu_start:
+				handleStart();
+				break;
+			case R.id.menu_stop:
+				handleStop();
+				break;
+			case R.id.menu_prefs:
+				handlePrefs();
+				break;
+			case R.id.menu_about:
+				handleAbout();
+				break;
+			case R.id.menu_exit:
+				finish();
+				break;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -737,17 +913,19 @@ public class PrimitiveFtpdActivity extends Activity {
 	protected void handleStart() {
 		if (hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE)) {
 			ServicesStartStopUtil.startServers(this, prefsBean, this);
+
 		}
 	}
 
 	/**
 	 * Checks whether the app has the following permission.
-	 * @param permission The permission name
+	 *
+	 * @param permission  The permission name
 	 * @param requestCode The request code to check against in the {@link #onRequestPermissionsResult} callback.
 	 * @return true if permission has been granted.
 	 */
 	protected boolean hasPermission(String permission, int requestCode) {
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if (prefsBean.getStorageType() == StorageType.PLAIN) {
 				if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
 					requestPermissions(new String[]{permission}, requestCode);
@@ -765,12 +943,12 @@ public class PrimitiveFtpdActivity extends Activity {
 				// If request is cancelled, the result arrays are empty.
 				boolean granted = grantResults.length > 0
 						&& grantResults[0] == PackageManager.PERMISSION_GRANTED;
-				if(granted) {
+				if (granted) {
 					ServicesStartStopUtil.startServers(this, prefsBean, this);
 				} else {
 					String textPara = getString(R.string.permissionNameStorage);
 					Toast.makeText(this, getString(R.string.permissionRequired, textPara), Toast.LENGTH_LONG).show();
-				}
+					}
 			}
 		}
 	}
@@ -789,12 +967,13 @@ public class PrimitiveFtpdActivity extends Activity {
 
 	protected void handleStop() {
 		ServicesStartStopUtil.stopServers(this);
+
 	}
 
 	protected void handlePrefs() {
 		Class<?> prefsActivityClass = theme == Theme.DARK
-			? FtpPrefsActivityThemeDark.class
-			: FtpPrefsActivityThemeLight.class;
+				? FtpPrefsActivityThemeDark.class
+				: FtpPrefsActivityThemeLight.class;
 		Intent intent = new Intent(this, prefsActivityClass);
 		startActivity(intent);
 	}
@@ -824,22 +1003,37 @@ public class PrimitiveFtpdActivity extends Activity {
 			prefsChanged = false;
 			if (serversRunning != null && serversRunning.atLeastOneRunning()) {
 				Toast.makeText(
-					getApplicationContext(),
-					R.string.restartServer,
-					Toast.LENGTH_LONG).show();
+						getApplicationContext(),
+						R.string.restartServer,
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	}
 
 	protected void handleLoggingPref(SharedPreferences prefs) {
 		String loggingStr = prefs.getString(
-			LoadPrefsUtil.PREF_KEY_LOGGING,
-			Logging.NONE.xmlValue());
+				LoadPrefsUtil.PREF_KEY_LOGGING,
+				Logging.NONE.xmlValue());
 		Logging logging = Logging.byXmlVal(loggingStr);
 		// one could argue if this makes sense :)
 		logger.debug("got 'logging': {}", logging);
 		PrimFtpdLoggerBinder.setLoggingPref(logging);
 		// re-create own log, don't care about other classes
 		this.logger = LoggerFactory.getLogger(getClass());
+	}
+
+	private class MyMainReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+
+			if (action.equals(SEND_LOG_USER_TO_CONSOLE)) {
+
+				Log.e("MyMainReceiver ","MyMainReceiver ");
+
+			}
+		}
+
 	}
 }

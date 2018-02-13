@@ -6,6 +6,7 @@ import ezequiel.ftpserver.prefs.StorageType;
 import java.io.File;
 import java.io.Serializable;
 
+
 public class PrefsBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
@@ -30,22 +31,22 @@ public class PrefsBean implements Serializable
 	private final String safUrl;
 
 	public PrefsBean(
-		String userName,
-		String password,
-		boolean anonymousLogin,
-		int port,
-		int securePort,
-		File startDir,
-		boolean announce,
-		String announceName,
-		boolean wakelock,
-		boolean pubKeyAuth,
-		boolean foregroundService,
-		ServerToStart serverToStart,
-		String ftpPassivePorts,
-		Integer idleTimeout,
-		StorageType storageType,
-		String safUrl)
+			String userName,
+			String password,
+			boolean anonymousLogin,
+			int port,
+			int securePort,
+			File startDir,
+			boolean announce,
+			String announceName,
+			boolean wakelock,
+			boolean pubKeyAuth,
+			boolean foregroundService,
+			ServerToStart serverToStart,
+			String ftpPassivePorts,
+			Integer idleTimeout,
+			StorageType storageType,
+			String safUrl)
 	{
 		super();
 		this.userName = userName;
@@ -141,4 +142,8 @@ public class PrefsBean implements Serializable
 	public String getSafUrl() {
 		return safUrl;
 	}
+
+
+
+
 }

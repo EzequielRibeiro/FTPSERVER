@@ -41,5 +41,6 @@
     <string name="prefTitleWakelock">Empêcher la mise en veille</string>
     <string name="prefTitleWhichServerToStart">Serveur(s) à démarrer</string>
     <string name="prefSummaryWhichServerToStart">Choisissez de lancer le serveur FTP, le serveur SFTP, ou les deux</string>
+    <string name="grantingPremission">w = accorder l\'écriture r = accorder lecture</string>
 
 </resources>

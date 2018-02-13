@@ -92,6 +92,8 @@
     <string name="startServerAndExit">start server only</string>
     <string name="startServerAndUi">start with server</string>
 
+    <string name="grantingPremission">w = permissão de escrita r = permissão de leitura</string>
+
     <string-array name="prefWhichServerToStartNames">
         <item>FTP and SFTP</item>
         <item>FTP only</item>

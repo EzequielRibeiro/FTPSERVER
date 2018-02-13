@@ -6,9 +6,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <uses-feature android:name="android.hardware.wifi" />
-
 
     <application
         android:allowBackup="true"
@@ -16,7 +17,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".MyGetAppContext"
+        >
+
         <!--
         <activity
             android:name=".MainActivity"
@@ -29,36 +33,34 @@
         </activity>
         -->
 
-        <receiver android:enabled="true" android:name=".BootUpReceiver"
+        <receiver
+            android:name=".BootUpReceiver"
+            android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name="StartStopWidgetProvider">
-            <intent-filter >
-                <action
-                    android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <receiver android:name=".StartStopWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
         </receiver>
-
         <receiver
             android:name=".remotecontrol.PftpdPowerTogglesPlugin"
             android:enabled="true"
-            android:permission="com.painless.pc.permission.CONTROL_PLUGIN"
             android:icon="@drawable/ic_notification"
-            >
+            android:permission="com.painless.pc.permission.CONTROL_PLUGIN">
             <intent-filter>
                 <action android:name="com.painless.pc.ACTION_SET_STATE" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".remotecontrol.TaskerReceiver"
             android:exported="true"
@@ -82,9 +84,11 @@
         <activity
             android:name=".PrimitiveFtpdActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -111,105 +115,118 @@
         </activity>
         -->
         <activity
-            android:name="ezequiel.ftpserver.prefs.FtpPrefsActivityThemeDark"
+            android:name=".prefs.FtpPrefsActivityThemeDark"
             android:label="@string/prefCategoryTitle"
-            android:theme="@style/PrimFtpdDarkTheme">
-        </activity>
-
+            android:theme="@style/PrimFtpdDarkTheme" />
         <activity
-            android:name="ezequiel.ftpserver.prefs.FtpPrefsActivityThemeLight"
+            android:name=".prefs.FtpPrefsActivityThemeLight"
             android:label="@string/prefCategoryTitle"
-            android:theme="@style/PrimFtpdLightTheme">
-        </activity>
-
+            android:theme="@style/PrimFtpdLightTheme" />
         <activity
-            android:name="ezequiel.ftpserver.prefs.AboutActivity"
-            android:label="About">
-        </activity>
-
+            android:name=".prefs.AboutActivity"
+            android:label="About" />
         <activity
-            android:name="ezequiel.ftpserver.remotecontrol.TaskerEditActionActivity"
+            android:name=".remotecontrol.TaskerEditActionActivity"
             android:label="@string/selectServerAction">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
         </activity>
         <activity
-            android:name="ezequiel.ftpserver.remotecontrol.TaskerEditConditionActivity"
+            android:name=".remotecontrol.TaskerEditConditionActivity"
             android:label="@string/state">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_CONDITION" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="ezequiel.ftpserver.ReceiveShareActivity"
+            android:name=".ReceiveShareActivity"
             android:label="@string/saveAs">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="video/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="ezequiel.ftpserver.filepicker.ResettingFilePickerActivity"
+            android:name=".filepicker.ResettingFilePickerActivity"
             android:label="@string/app_name"
             android:theme="@style/FilePickerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <service android:name="ezequiel.ftpserver.services.FtpServerService" />
-        <service android:name="ezequiel.ftpserver.services.SshServerService" />
-        <service android:name="ezequiel.ftpserver.services.ServicesStartingService" />
+        <service android:name=".services.FtpServerService" />
+        <service android:name=".services.SshServerService" />
+        <service android:name=".services.ServicesStartingService" />
         <service
             android:name=".services.QuickSettingsService"
             android:icon="@drawable/ic_notification"
@@ -219,6 +236,14 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <service android:name="ezequiel.ftpserver.services.ServiceLogCat"/>
+
+        <activity
+            android:name=".activity_list_users"
+            android:label="@string/title_activity_list_users"
+            android:theme="@style/AppTheme.NoActionBar" />
+
 
 
 

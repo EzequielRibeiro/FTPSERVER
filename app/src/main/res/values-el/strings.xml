@@ -88,5 +88,6 @@
         <item>Καταγραφή σε αρχείο κειμένου</item>
         <item>Καταγραφή στο Android</item>
     </string-array>
-    
+    <string name="grantingPremission">w = χορήγηση εγγραφής r = χορήγηση αναγνώσεως</string>
+
 </resources>

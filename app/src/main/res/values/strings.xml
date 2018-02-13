@@ -92,6 +92,9 @@
     <string name="startServerAndExit">start server only</string>
     <string name="startServerAndUi">start with server</string>
 
+
+    <string name="grantingPremission">w = granting write\nr  = granting read</string>
+
     <string-array name="prefWhichServerToStartNames">
         <item>FTP and SFTP</item>
         <item>FTP only</item>
@@ -125,4 +128,6 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string name="title_activity_list_users">activity_list_users</string>
+    <string name="title_activity_main_list_users">main_activity_list_users</string>
 </resources>

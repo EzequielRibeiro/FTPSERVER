@@ -16,7 +16,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
         // required due to jars
         exclude 'META-INF/LICENSE'
@@ -25,12 +24,11 @@ android {
         exclude 'META-INF/BCKEY.SF'
         exclude 'META-INF/BCKEY.DSA'
     }
-
-
+    buildToolsVersion '26.0.2'
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.android.support:design:26.1.0'
@@ -42,6 +40,5 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.nononsenseapps:filepicker:4.0.0'
     compile 'eu.chainfire:libsuperuser:1.0.0.201704021214'
-    compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.45'
-
+    compile 'org.bouncycastle:bcprov-jdk16:1.45'
 }
