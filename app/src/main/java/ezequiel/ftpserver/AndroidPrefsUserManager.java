@@ -2,8 +2,6 @@ package ezequiel.ftpserver;
 
 import android.content.Intent;
 import android.os.Environment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.apache.ftpserver.ftplet.Authentication;
 import org.apache.ftpserver.ftplet.AuthenticationFailedException;
@@ -22,10 +20,12 @@ import ezequiel.ftpserver.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static ezequiel.ftpserver.MyGetAppContext.getContext;
 
 public class AndroidPrefsUserManager implements UserManager {
 
@@ -109,46 +109,32 @@ public class AndroidPrefsUserManager implements UserManager {
 	public boolean doesExist(String username) {
 
 		boolean user = prefsBean.getUserName().equals(username) || ANONYMOUS_USER_NAME.equals(username);
-
-		Intent sendBroadcastMain = new Intent();
-		sendBroadcastMain.setAction(PrimitiveFtpdActivity.SEND_LOG_USER_TO_CONSOLE);
-		sendBroadcastMain.putExtra(PrimitiveFtpdActivity.SEND_LOG_USER_TO_CONSOLE,"testeeeee");
-
-		//boolean b = LocalBroadcastManager.getInstance(MyGetAppContext.getContext()).sendBroadcast(sendBroadcastMain);
-		//Log.e("LocalBroadcastManager",Boolean.toString(b));
 		return user;
-
 	}
 
 	@Override
 	public User authenticate(Authentication authentication)
 			throws AuthenticationFailedException
 	{
-		String userName = "" ;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("d MMM yyyy HH:mm:ss:SS");
+        String resultTime = formatter.format(new Date());
 
 		if (authentication instanceof UsernamePasswordAuthentication) {
 			UsernamePasswordAuthentication auth = (UsernamePasswordAuthentication) authentication;
-			userName = auth.getUsername();
+
+            new DbHandle(getContext()).onInsertLog(resultTime,auth.getUsername());
+
 			if (doesExist(auth.getUsername())) {
-
-				new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-						"User trying to login: " +auth.getUsername());
-
 				String pw = auth.getPassword();
-				userName = auth.getUsername();
 
 				if (!StringUtils.isBlank(pw)) {
 					String encryptedPW = EncryptionUtil.encrypt(pw);
 					String storedPW = prefsBean.getPassword();
 					if (storedPW.equals(encryptedPW)) {
-
-				new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-								"Password accepted to: " +auth.getUsername());
-					return buildUser();
+         					return buildUser();
 					}else{
 
-				new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-								"Wrong password to: " +auth.getUsername());
 
 					}
 				}
@@ -156,19 +142,13 @@ public class AndroidPrefsUserManager implements UserManager {
 		} else if(authentication instanceof AnonymousAuthentication) {
 			if(prefsBean.isAnonymousLogin()) {
 
-				String adress = ((AnonymousAuthentication) authentication).getUserMetadata().getInetAddress().getHostAddress().toString();
+             new DbHandle(getContext()).onInsertLog(resultTime,ANONYMOUS_USER_NAME);
 
-				new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-						 adress +" -> User login with: " +ANONYMOUS_USER_NAME);
-
-				return anonymousUser();
+					return anonymousUser();
 			}
 		}
 
-		new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-				"User was unable to connect: " +userName);
-
-		throw new AuthenticationFailedException();
+	     throw new AuthenticationFailedException();
 	}
 
 	@Override

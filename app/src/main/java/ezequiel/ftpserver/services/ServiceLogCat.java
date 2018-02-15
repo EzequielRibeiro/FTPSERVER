@@ -66,7 +66,7 @@ public class ServiceLogCat extends Service {
                                 if (lastRegister > actualRegister) {
 
 
-                                    String reg = cursor.getString(cursor.getColumnIndex(DbHandle.KEY_DATA))+": "+
+                                    String reg = cursor.getString(cursor.getColumnIndex(DbHandle.KEY_DATA))+"  "+
                                             cursor.getString(cursor.getColumnIndex(DbHandle.KEY_REGISTRO));
 
                                     intent.putExtra(PrimitiveFtpdActivity.SEND_LOG_USER_TO_CONSOLE,reg);

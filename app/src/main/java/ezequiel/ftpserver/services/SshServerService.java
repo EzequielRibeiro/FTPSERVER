@@ -98,6 +98,7 @@ public class SshServerService extends AbstractServerService
 		// causes exception when not set
 		sshServer.setIoServiceFactoryFactory(new MinaServiceFactoryFactory());
 
+
 		// enable scp and sftp
 		sshServer.setCommandFactory(new ScpCommandFactory());
 		List<NamedFactory<Command>> factoryList = new ArrayList<>(1);

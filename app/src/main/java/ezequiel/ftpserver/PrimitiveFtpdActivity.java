@@ -254,7 +254,7 @@ public class PrimitiveFtpdActivity extends Activity {
 		try {
 			if (cursorLog.moveToFirst()) {
 				do {
-					 String log = cursorLog.getString(cursorLog.getColumnIndex(DbHandle.KEY_DATA))+": "+
+					 String log = cursorLog.getString(cursorLog.getColumnIndex(DbHandle.KEY_DATA))+" | "+
 							 cursorLog.getString(cursorLog.getColumnIndex(DbHandle.KEY_REGISTRO));
 
 					listLog.add(log);

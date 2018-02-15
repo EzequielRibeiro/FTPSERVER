@@ -75,7 +75,7 @@ public class DbHandle extends SQLiteOpenHelper {
                 KEY_ID + " INTEGER PRIMARY KEY," + // Define a primary key
                 KEY_DATA + " TEXT," + // Define a foreign key
                 KEY_REGISTRO + " TEXT,"+
-                "UNIQUE("+KEY_ID+"))";
+                "UNIQUE("+KEY_ID+","+KEY_DATA+"))";
 
         db.execSQL(CREATE_LOG_TABLE);
 
@@ -84,6 +84,7 @@ public class DbHandle extends SQLiteOpenHelper {
     public void onInsertLog(String data,String register){
 
         SQLiteDatabase db = getWritableDatabase();
+       /*
         long logId = -1;
 
         db.beginTransaction();
@@ -101,7 +102,45 @@ public class DbHandle extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+        */
+        long dataLog = -1;
 
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_DATA,data);
+            values.put(KEY_REGISTRO, register);
+
+            // First try to update the user in case the user already exists in the database
+            // This assumes userNames are unique
+            int rows = db.update(TABLE_LOG, values, KEY_DATA + "= ?", new String[]{data});
+
+            // Check if update succeeded
+            if (rows == 1) {
+                // Get the primary key of the user we just updated
+                String usersSelectQuery = String.format("SELECT %s FROM %s WHERE %s = ?",
+                        KEY_ID, TABLE_LOG, KEY_DATA);
+                Cursor cursor = db.rawQuery(usersSelectQuery, new String[]{String.valueOf(data)});
+                try {
+                    if (cursor.moveToFirst()) {
+                        dataLog = cursor.getInt(0);
+                        db.setTransactionSuccessful();
+                    }
+                } finally {
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.close();
+                    }
+                }
+            } else {
+                // user with this userName did not already exist, so insert new user
+                dataLog = db.insertOrThrow(TABLE_LOG, null, values);
+                db.setTransactionSuccessful();
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to add or update user");
+        } finally {
+            db.endTransaction();
+        }
 
     }
 
