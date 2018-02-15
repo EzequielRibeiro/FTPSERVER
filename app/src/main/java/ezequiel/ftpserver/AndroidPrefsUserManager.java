@@ -156,8 +156,10 @@ public class AndroidPrefsUserManager implements UserManager {
 		} else if(authentication instanceof AnonymousAuthentication) {
 			if(prefsBean.isAnonymousLogin()) {
 
+				String adress = ((AnonymousAuthentication) authentication).getUserMetadata().getInetAddress().getHostAddress().toString();
+
 				new DbHandle(MyGetAppContext.getContext()).onInsertLog( DateFormat.getDateTimeInstance().format(new Date()),
-						"User login with: " +ANONYMOUS_USER_NAME);
+						 adress +" -> User login with: " +ANONYMOUS_USER_NAME);
 
 				return anonymousUser();
 			}
